@@ -20,8 +20,6 @@ ___
 
 So, let's embark on the journey of decoding waves. It may seem daunting at first, but as I will show you, it's easier than it looks.
 
-Let me show you how I went about decoding my first ever radio signal.
-
 Firstly, I started by looking up how a wave file can be read in python, so that I can do something with the data stored in the file.
 
 Secondly, I wanted to plot out the signal, to see if there's some sort of repeating pattern in it. We can use Audacity to get this plot:
