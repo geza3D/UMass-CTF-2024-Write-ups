@@ -4,7 +4,7 @@
 
 This document contains the writeups for **Red40 Maxxing**, **Yellow6 Maxxing** and **Yellow5 Maxxing**. 
 
-***Disclaimer***: I'm not educated in the means of decoding radio signals. I'm completely inexperienced in this field and I lack the proper vocabulary for it. I apologize for that to those who are actually in this field. However, it will probably make my writeup a lot more easier to understand for those who are new to this.
+***Disclaimer***: I'm not educated in the means of decoding radio signals. I'm completely inexperienced in this field and I lack the proper vocabulary for it. I apologize for that to those who are in this field. However, it will probably make my writeup a lot easier to understand for those who are new to this.
 
 The code, both sources and in this document, will contain comments in it describing what each part does and why. They have been heavily cleaned up, while preserving what they did, when I obtained the flags using them. I did this to make the code reflect my thinking process while I was trying to figure out how to obtain the flag.
 
@@ -16,23 +16,25 @@ ___
 
 *"I picked up this signal coming from a Bikini Bottom computer, but I have no idea what it means. Can you help me demodulate it? (The signal has been shifted to baseband. There is no audio in this file. The signal contains an english sentence repeated several times, modulated somehow onto the carrier. Enter the key as UMASS{\<some_sentence_here\>}, where everything between the angle brackets has been replaced with the lowercase version of the sentence that was transmitted. Example if Hello_there was transmitted the key would be UMASS{hello_there})."*
 
-### My approaches
+### Initial Approaches
 
-So, my journey into decoding waves began here. I've decided to try to figure this one out because I saw that there were not many solves for it, and that it was marked as *Beginner*. I didn't think that I would be able to solve this.
+So, let's embark on the journey of decoding waves. It may seem daunting at first, but as I will show you, it's easier than it looks.
 
-But how do I analyze a wave? How do I get a message out of this?
+Let me show you how I went about decoding my first ever radio signal.
 
-First, I started by looking up how I can read a wave file in python, so that I can actually do something with the data stored in the file.
+Firstly, I started by looking up how a wave file can be read in python, so that I can do something with the data stored in the file.
 
-Secondly, I wanted to plot out the signal, to see if there's somesort of repeating pattern in it. I used Audacity to get this plot:
+Secondly, I wanted to plot out the signal, to see if there's some sort of repeating pattern in it. We can use Audacity to get this plot:
 
 ![An image of red40-maxxing.wav plotted out in Audacity](red40-maxxing-wave.png)
 
-I was trying to look for something that was repeating in it, but I couldn't. So as an experiment, I tried checking what would happen if I took the positive points of the wave as 1 and the negative points of the wave as 0.
+I was trying to look for something that was repeating in it but as you can see there's no noticeable pattern in it.
 
-### My solution
+### The Solution
 
-So finally, I ended up with this code which ended up giving me the flag:
+As an experiment, I tried checking what would happen if I took the positive points of the wave as 1 and the negative points of the wave as 0.
+
+I ended up with this code:
 
 ```python
 import wave
@@ -64,7 +66,7 @@ print(msg)
 
 Output: `Its_not_just_a_boulder_its_a_rockIts_not_just_a_boulder_its_a_rockIts_not_just_a_boulder_its_a_rockIts_not_just_a_boulder_its_a_rock...`
 
-I really didn't expect that it would work. I was surprised to see that it was actually that simple to solve. With my sudden rush of dopamine, I started working on the next challenge: Yellow6 Maxxing.
+And to my surprise it worked. I had solved my first ever radio signal decoding challenge. I wanted to see how far I can go, so I moved onto the next challenge.
 
 ## Yellow6 Maxxing
 
@@ -75,25 +77,25 @@ Hint: This is a qam signal.\*"*
 
 *The hint was added / I noticed the hint after I figured out the solution myself.
 
-### My approaches
+### Initial Approaches
 
-This challenge was a bit more difficult than the previous one. Before I did anything, I tried running it through my previous code, but it came back with nonsense. I knew I had something else here.
+This challenge was a bit more difficult than the previous one. Before I did anything, I tried running it through my previous code, but it came back with nonsense. We have something else here.
 
-So the same as before, I wanted to look at the shape of wave:
+So, the same as before, let's look at the shape of the wave.
 
 ![An image of yellow6-maxxing.wav plotted out in Audacity](yellow6-maxxing-wave.png)
 
-What I've seen was a clean wave with some distortions sprinkled in at the time points. So I thought those are what contain the data. I was trying to find a way to mark those locations and then use that as a way to obtain binary data. But when I printed the data points out, I was surprised to see that it was actually different waves starting from those break point.
+If you have a keen eye for this, you may have spotted how it's encoded but when I was trying to solve it what I saw a clean wave with some distortions sprinkled in at the time points. So, I wrongly assumed that those are what contain the data. I was trying to find a way to mark those locations and then use that to obtain binary data. But when I printed the data points out, I quickly realized that my initial assumption were wrong. We can see in the image bellow that there are different waves starting from those distorted looking points.
 
 ![An image of yellow6-maxxing.wav's data points printed out](yellow6-maxxing-array.png)
 
-Unfortunately, I was only looking at the starting numbers. I didn't check the numbers after that. Honestly, I was pretty lucky that the numpy arrays printed out the values like this, because it clearly showed that the patterns changed every 40 data points (though, `Wave_read::getFramerate()` had also given me 40, but it wasn't intuitive to me what that meant, until I figured this out).
+It was pretty lucky that the numpy arrays printed out the values like this because it clearly showed that the patterns changed every 40 data points (though, `Wave_read::getFramerate()` will also give us 40 as the frequency but it wasn't intuitive to me what that meant until I figured this out).
 
-So my new idea to crack the code was to take every 40th value from the array, and convert that to binary the same way I did for Red40 Maxxing. Unfortunately, that also didn't give me any results.
+Unfortunately, I made the mistake of only looking at the starting numbers. I didn't check the numbers after that. So, my next cracking attempt was to take every 40th value from the array and convert that to binary the same way I did for **Red40 Maxxing**. It's easy to see why that wouldn't work.
 
-So, I looked at the values in the array again. And now I actually noticed that there were not 2 different waves, but actually at least 3! It's clearly visible in the image I embeded above. So my next and final approach was to find every unique wave. I ended up with four unique patterns. So my next conclusion was that it was quaternary. So I took my unique pattern finding code, and gave it some extra logic.
+### The solution
 
-### My solution
+After looking at the values in the array again I finally noticed that there were not 2 different waves but actually at least 3. So, my next and final approach was to find every unique wave. I wrote a simple script to do that, and I ended up with four unique patterns. Now, it's rather easy to conclude that it was encoded in quaternary where the different waves represented either 0, 1, 2 or 3. So I took my unique pattern finding code and gave it some extra logic.
 
 At end, I was looking at this code:
 
@@ -158,7 +160,7 @@ print(msg)
 
 Output: `Hiiii_KevinHiiii_KevinHiiii_KevinHiiii_KevinHiiii_KevinHiiii_KevinHiiii_Kevin...`
 
-I was really happy to see that I was able to crack this one too. I was confident that with enough determination, I would be able to solve Yellow5 Maxxing as well. However, that one proved to be a lot harder than the previous two.
+I was rather pleased to see that I was able to crack this one too. With enough determination I was certain that I would be able to solve **Yellow5 Maxxing** as well. However, that one proved to be a lot harder than the previous two.
 
 ## Yellow5 Maxxing
 
@@ -167,41 +169,41 @@ I was really happy to see that I was able to crack this one too. I was confident
 *"I picked up another signal coming from a Bikini Bottom computer, but this time it is full of noise, it's spectrum is all spreadout. Can you help me demodulate it? (There is no audio in this file. The signal contains an english sentence repeated several times, modulated somehow onto the carrier. Enter the key as UMASS{\<some_sentence_here\>}, where everything between the angle brackets has been replaced with the lowercase version of the sentence that was transmitted. Example if Hello_there was transmitted the key would be UMASS{hello_there}).
 Hint: This is a very noisy signal. Autocorrelation might be useful here"*
 
-### My approaches
+### Initial Approaches
 
-This was it. The final challenge of radio signal cracking. With no solves even on the second day of the competition, I was not really sure if I'd be able to make it.
+This is it. Our final challenge of radio signal cracking. With no solves even on the second day of the competition, I was not sure if I'd be able to make it.
 
-So my first idea with this one was not to plot it with Audacity, since as the description said, it was full of noise. I needed a way to get rid of the noise.
+So, my first idea with this one was not to plot it with Audacity, since as the description said, it was full of noise. We need a way to get rid of the noise.
 
-So I began by looking at the length of the data: 447 640. My idea was that if this wave contained a repeating sentence, then it must be repeating in it a whole number of times. So I went ahead and factorized 447 640. This number has a lot of factors, so I won't be listing them here. I was looking for a factor that would be a potential length of a sentence. So I settled on 248 (later turned out that it wasn't the correct length). 31 was also a factor, but we will return to it later.
+So, let's take a look at the length of the data: 447 640. My idea was that if this wave contained a repeating sentence, then it must be repeating in it a whole number of times. After factorizing this number, I wrongly settled on the factor 248. The other notable factor was 31, which we will later see will play a major role in decoding the signal.
 
-Now, my idea to get rid of the noise was to average out the signal, by splitting up my data into 248 long arrays, and taking their average by index (for example: A = [2, 3, 4]; B = [3, 1, 5]; C = [1, 5, 2] and D will contain the averages by index. What this means is that we calculate the elements of D like this: D[i] := (A[i] + B[i] + C[i]) / 3) = AVG(A[i], B[i], C[i]). This idea came from how some of my teammates have solved the **Stop the voices** challenge. They took the average of all the noisy images, to obtain an image with the flag readable on it.
+Now, the my way of getting rid of the noise was to split up my data into 248 long arrays, and take their average by index (Let me explain what I mean by this: let's take an example: A = [2, 3, 4]; B = [3, 1, 5]; C = [1, 5, 2] and D will contain the averages by index. What this means is that we calculate the elements of D like this: D[i] := (A[i] + B[i] + C[i]) / 3 = AVG(A[i], B[i], C[i]), so for example D[1] = 2). This idea came from how some of my teammates have solved the **Stop the voices** challenge. That challenge had one image that was made unreadable by some added noise. There were many of these noisy images all with different noises, and they needed a way to extract the flag from them. Their approach was to average out all the noisy images to remove the noise and make the flag readable again.
 
-So I wrote the code for that, I plotted my result out, to see what I've gotten:
+I wrote the code for that, and used matplotlib to plot my result out. Let's look at this plot:
 
 ![An image of what I thought was yellow5-maxxing.wav's data points cleared up](yellow5-maxxing-wrong-approach1.png)
 
-Now, I was looking into way of decoding this, on which I kind of gave up first. So I went ahead and tried multiples of this. This is what I've gotten when I took 2480 as the length:
+I was looking into way of decoding this. If we look at it, it looks a bit artificial. But other than that, there is nothing repeating in it. Consequently, I went ahead and tried multiples of this. This is what I've gotten when I took 2480 as the length:
 
 ![An image of what I thought was yellow5-maxxing.wav's data points cleared up](yellow5-maxxing-wrong-approach2.png)
 
-I said: "Hey! That looks like a pattern!" I saw that the values between these separator lines were changing, so I thought that was the way the message was encoded (And also because I watched a bunch of youtube videos about radio waves and the ways they were used to send message with, I concluded that this looked like an A.M. ([Amplitude Modulation](https://en.wikipedia.org/wiki/Amplitude_modulation)) signal). But this ended up being a dead end again.
+This looks more like a pattern. The values between these separator lines are changing, so I quickly jumped to the conclusion that this was the way the message was encoded (And also based on my research it was kind resembling an A.M. signal ([Amplitude Modulation](https://en.wikipedia.org/wiki/Amplitude_modulation))). But this was a dead end again.
 
-Now I went after the hint that was given with the challenge: Autocorrelation. I had no clue what that was. I googled it, I watched youtube videos, I spent some time researching it. I've managed to understand what it did on a basic level. So this is how I understood it: It takes the signal, then starts shifting (lagging) it with different numbers, and then checking how similar it is to its shifted version. 1 means that it's 100% similar, 0 means that it's not similar at all, and -1 means that the signal is the same but inverted. The values can obviously be between these points, showing different levels of similarity.
+### The Solution
 
-I went ahead and started searching for a python module that can do this function. I ended up finding a module that had a function which would plot this autocorrelation out for me. The issue was that it was taking forever to calculate so I just took a shorter segment of the signal with lags ranging from 0 to its length. First I saw that it was getting a high similarity value at 248 which I thought meant that it was actually my first plot that showed me the cleared up wave. But after still failing to find a way to decode that, I've realized that I may be looking at a too small of a picture, so I took a bigger segment out and I've gotten this plot:
+Now there was one other thing I forgot to investigate: the hint, which was to use Autocorrelation. If you don't know what this is, don't worry, I didn't either. After researching it for a few hours I've managed to understand what it was on a basic level. So let me explain how I understood it: It takes the signal, then starts shifting (lagging) it with different numbers, and then it checks how similar it is to its unshifted version. 1 means that it's 100% similar, 0 means that it's not similar at all, and -1 means that the signal is the same, but it's mirrored on the x-axis. The values can also be between these points, showing different levels of similarity.
+
+I found a python module that had a function which would plot this autocorrelation out. The issue was that it was taking forever to calculate so I just took a shorter segment of the signal with lags ranging from 0 to its length. I started with small values. First, I saw that it was getting a high similarity value at 248, but I after revisiting that approach, it still yielded no results. I started going for bigger values. Here you can see the plot I've managed to generate:
 
 ![An image of yellow5-maxxing.wav's autocorrelation](yellow5-maxxing-autocorrelation.png)
 
-I suddenly realized that it was actually repeating after every 11160 data points, instead of what I initially thought. So I went back to my averaging code, changed the size to this new number, then I started trying to figure out, what was encoded into the averaged version of this one.
+It's easy to see that it's repeating after every 11160 data points instead of what I initially assumed. So I changed my averaging code to use this new length. This array of values I had now was the actually message.
 
-I first tried the same approach I used to solve **Red40 Maxxing**. I've gotten random characters again, but I saw something, that made me a bit excited. It looked like those random characters were actually repeating. Since looking at those almost completely random ascii characters was really unviable, I just wrote them out as unsigned 8-bit integers instead. I was really excited when I noticed these numbers repeating:
+It's always intuitive to first try the same approaches as before. The **Red40 Maxxing** approach seemed to be a dead end at first since it was printing out almost random characters, but it turned out that those random characters were actually repeating. Since looking at those almost completely random ascii characters was unviable, I just printed them out as unsigned 8-bit integers, instead. Let's look at what those values were after I added enters before the repeating parts:
 
 ![An image of yellow5-maxxing.wav's cleared up wave converted into integers and printed out](yellow5-maxxing-cleared-values.png)
 
-I went: "Okay, this looks exactly like the last exercise, so I will just take the binary array of this, and run my unique finding script on it." I guessed the length of the values as 31, not realizing that it was only when they were converted to 8-bit unsigned integers when they looked like this. But my mistake became my luck, because it ended up being the length of the repeating binary sequences too<sup>1</sup>. This time there were 2 unique sequences. I made the first one represent 1 and the second one represent 0.
-
-### The solution
+It looked like it was like **Yellow6 Maxxing** in the sense that different types of lines can be seen. I used my unique pattern finding code again. I guessed the length of the values as 31 (which was also a factor of the whole length of the data), not realizing that it was only the length of the repeating code when they were converted to 8-bit unsigned integers. But it ended up being a good guess because it was also the length of the repeating binary sequences<sup>1</sup>. This time there were 2 unique sequences. I made the first one represent 1 and the second one represent 0.
 
 So, I ended up with this code:
 
@@ -286,14 +288,14 @@ print(msg)
 
 Output: `nd_meKrusty_Krab_pizza_is_the_pizza_for_you_a`
 
-I was really pleased to see that I've gotten something that was actually readable. I didn't think I'd be able to make this far.
+I was really pleased to see that I've gotten something that was readable. I didn't think I'd be able to make this far.
 
 ## Conclusion
 
-I really liked how these challenges were built up. I could cleary categorize them by levels of difficultly. Red40 was the beginner, Yellow6 was the intermediary, and Yellow5 was the expert level. It made it really smooth for people who never had experience with radio signals (including me) to get into this subject and actually learn new things.
+I really liked how these challenges were built up. I could clearly categorize them by levels of difficultly. Red40 was the beginner, Yellow6 was the intermediary, and Yellow5 was the expert level. It made it really smooth for people who never had experience with radio signals (including me) to get into this subject and actually learn new things.
 
-Speaking of learning new things. I thought radio waves were a topic I would never understand nor be able to get data out of but I was proven wrong. This exercise made me put some research into the field, and it really raised my interest for it. I never even considered how this invisible world around us works, and now I have a much greater appreciation for it.
+Speaking of learning new things. I thought radio waves were a topic I would never understand nor be able to get data out of, but I was proven wrong. This exercise made me put some research into the field, and it really raised my interest for it. I never even considered how this invisible world around us works, and now I have a much greater appreciation for it.
 
 ## Notes and extras
 
-<sup>1</sup>After I thought this through, I came to the realization that the two were the same length, because of a simple mathematical coincidence. Let's look at how long of a binary sequence would represent 31 8-bit unsigned integers? 31\*8. Now, let's go the other way around. Let's say we have bit sequences with the length of 31. How many of them do we need to get a whole number of 8-bit unsigned integers out of them? Well, we need 8 bits to form one number, so we just need a multiple of 31 that is divisble by 8. Since, 31 is a prime, we can easily conclude that we need 31\*8 of them. The exact same value we have just gotten, starting from the other end. I thought I will explain this coincidence, because I thought it's really interesting.
+<sup>1</sup>After I thought this through, I came to the realization that the two were the same length, because of a simple mathematical coincidence. Let's look at how long of a binary sequence would represent 31 8-bit unsigned integers? 31\*8. Now, let's go the other way around. Let's say we have bit sequences with the length of 31. How many of them do we need to get a whole number of 8-bit unsigned integers out of them? Well, we need 8 bits to form one number, so we just need a multiple of 31 that is divisible by 8. Since, 31 is a prime, we can easily conclude that we need 31\*8 of them. The exact same value we have just gotten, starting from the other end. I thought I will explain this coincidence because I thought it was really interesting.
